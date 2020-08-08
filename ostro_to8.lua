@@ -56,7 +56,7 @@ end
 local red = ColorReducer:new():analyzeWithDither(160,200,
 	getLinearPixel,
     function(y)
-		thomson.info("Collecting stats...",math.floor(y/2),"%")
+		thomson.info("Collecting stats...",math.floor(y*100),"%")
 	end)
 	
 -- BM16 mode
@@ -72,7 +72,7 @@ OstroDither:new(palette)
              function(y,x) return getLinearPixel(x,y) end,
 			 function(y,x,c) thomson.pset(x,y,c) end, 
 			 true,
-			 function(x) thomson.info("Converting...",math.floor(x*100/160),"%") end)
+			 function(x) thomson.info("Converting...",math.floor(x*100),"%") end)
 
 -- refresh screen
 setpicturesize(320,200)

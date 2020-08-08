@@ -95,7 +95,7 @@ function dither:dither40cols(serpentine)
 				  end,
 				  serpentine or true, function(y) 
 					thomson.info("Converting...",
-						math.floor(y*200/thomson.h),"%") 
+						math.floor(y*100),"%") 
 				  end,true)
 
 	-- refresh screen

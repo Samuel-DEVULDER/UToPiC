@@ -38,7 +38,7 @@ OstroDither:new():dither40cols(function(w,h,getLinearPixel)
 		pal=ColorReducer:new():analyzeWithDither(w,h,
 			getLinearPixel,
 			function(y)
-				thomson.info("Building palette...",math.floor(y*100/h),"%")
+				thomson.info("Building palette...",math.floor(y*100),"%")
 			end):boostBorderColors():buildPalette(16)
 	end
 	

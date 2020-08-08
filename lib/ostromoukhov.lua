@@ -433,14 +433,15 @@ function OstroDither:dither(screen_w,screen_h,getLinearPixel,pset,serpentine,inf
 		err1[x] = Color:new(0,0,0) 
 		err2[x] = Color:new(0,0,0) 
 	end
-
-	for y=0,screen_h-1 do
+	
+	screen_w,screen_h = screen_w-1,screen_h-1
+	for y=0,screen_h do
 		-- permute error buffers
 		err1,err2 = err2,err1
 		-- clear current-row's buffer
 		for i=-1,screen_w do err2[i]:mul(0) end
 		
-		local x0,x1,xs=0,screen_w-1,1
+		local x0,x1,xs=0,screen_w,1
 		if serpentine and y%2==1 then x0,x1,xs=x1,x0,-xs end
 		
 		for x=x0,x1,xs do
@@ -449,7 +450,7 @@ function OstroDither:dither(screen_w,screen_h,getLinearPixel,pset,serpentine,inf
 			                          err2[x-xs],err2[x])
 			pset(x,y,c-1)
 		end
-		info(y)
+		info(y/screen_h)
 	end
 end
 
@@ -525,7 +526,7 @@ function OstroDither:ccDither(screen_w,screen_h,getLinearPixel,pset,serpentine,i
 		
 		if not self:ccAcceptCouple(c1,c2)
 		    or histo:sum(1,2)<=self.clash_size-2 then
-			info(y)
+			info(y/screen_h)
 			local MAX=1e30
 			local dm=MAX
 			local function eval()
@@ -632,7 +633,7 @@ function OstroDither:dither40cols(getpalette,serpentine)
 				  getLinearPixel, thomson.pset, 
 				  serpentine or true, function(y) 
 					thomson.info("Converting...",
-						math.floor(y*100/thomson.h),"%") 
+						math.floor(y*100),"%") 
 				  end,true)
 
 	-- refresh screen

@@ -218,8 +218,8 @@ function ConvexHull:distToFace(F,pt)
 	return dot(N,P)
 end
 
-* <0 when inside, >0 when outside
-* ùight be buggy for points outside of hull because dist to vertex isn't computed
+-- <0 when inside, >0 when outside
+-- might be buggy for points outside of hull because dist to vertex isn't computed
 function ConvexHull:distToHull(pt)
 	local min,max
 	for _,F in ipairs(self.hull) do

@@ -451,9 +451,10 @@ end
 
 function ColorReducer:analyze(w,h,getLinearPixel,info)
 	if not info then info=function(y) thomson.info() end end
-	for y=0,h-1 do
-		info(y)
-		for x=0,w-1 do
+	h,w=h-1,w-1
+	for y=0,h do
+		info(y/h)
+		for x=0,w do
 			self:add(getLinearPixel(x,y))
 		end
 	end

@@ -136,13 +136,24 @@ function ConvexHull:addPoint(p)
 	if self.points then 
 		if p==self.points[1] or p==self.points[2] then return end
 		table.insert(self.points,p)
-		
 		if #self.points==3 then 
-			self.hull={
-				{self.points[1],self.points[2],self.points[3]},
-				{self.points[1],self.points[3],self.points[2]}
-			}
-			self.points=nil
+			local n = self:normal(self.points)
+			if dot(n,n)==0 then 
+				local p1,p2,p3=self.points[1],self.points[2],self.points[3]
+				if dot(self:vect(p1,p2),self:vect(p1,p3))<=0 then
+					self.points = {p2,p3}
+				elseif dot(self:vect(p2,p1),self:vect(p2,p3))<=0 then
+					self.points = {p1,p3}
+				else
+					self.points = {p1,p2}
+				end
+			else 
+				self.hull = {
+					{self.points[1],self.points[2],self.points[3]},
+					{self.points[1],self.points[3],self.points[2]}
+				}
+				self.points=nil
+			end
 		end
 	else
 		local seenF,n = {},0
@@ -187,6 +198,10 @@ function ConvexHull:verticesSet()
 			v[F[2]] = true
 			v[F[3]] = true
 		end
+	else
+		for _,p in ipairs(self.points) do
+			v[p] = true
+		end
 	end
 	return v
 end
@@ -203,17 +218,16 @@ function ConvexHull:distToFace(F,pt)
 	return dot(N,P)
 end
 
+* <0 when inside, >0 when outside
+* ùight be buggy for points outside of hull because dist to vertex isn't computed
 function ConvexHull:distToHull(pt)
-	local d
+	local min,max
 	for _,F in ipairs(self.hull) do
 		local t = self:distToFace(F,pt)
-		d = d==nil and t or
-			(0<=t and t<d or 
-			 0>=t and t>d) and t or
-			d
-		if d==0 then break end
+		min = min==nil and t or t<min and t or min
+		max = max==nil and t or t>max and t or max
 	end
-	return d
+	return max<=0 and max or min>=0 and -min or math.min(-min,max)
 end
 
 end -- ConvexHull

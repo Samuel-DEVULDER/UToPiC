@@ -555,16 +555,6 @@ function thomson.setBM4()
             end
             wait(0) -- allow for key handling
         end
-        if thomson.optiMAP then
-            -- 123
-            -- 132
-                   -- 213
-            -- 231
-            -- 312
-            -- 321
-
-            -- todo
-        end
         -- build data
         local data={
             -- BM4

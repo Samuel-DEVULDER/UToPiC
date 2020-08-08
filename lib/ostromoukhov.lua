@@ -42,6 +42,7 @@ function OstroDither:dist2(c1,c2)
 end
 
 function OstroDither:setLevelsFromPalette()
+	do return self end
 	local rLevels = {[1]=true,[16]=true}
 	local gLevels = {[1]=true,[16]=true}
 	local bLevels = {[1]=true,[16]=true}
@@ -370,9 +371,9 @@ function OstroDither:_coefs(linearLevel,rgb)
 		               g=process(self.levels.g),
 					   b=process(self.levels.b)}
 	end
-	local i = math.floor(linearLevel[rgb]*255/Color.ONE+.5)
+	local i,t = math.floor(linearLevel[rgb]*255/Color.ONE+.5),self._ostro[rgb]
 	i = 3*(i<0 and 0 or i>255 and 255 or i)
-	return self._ostro[rgb][i+1],self._ostro[rgb][i+2],self._ostro[rgb][i+3]
+	return t[i+1],t[i+2],t[i+3]
 end
 
 function OstroDither:_linearPalette(colorIndex)

@@ -192,6 +192,7 @@ end
 
 -- saves the thomson screen into a MAP file
 function thomson.savep(name)
+	thomson.last_info = os.clock() -- enable next info()
     if not name then return save_current_file() end
 
     wait(0) -- allow for key handling
@@ -322,6 +323,7 @@ function thomson.updatescreen()
                  thomson.levels.pc[b+1])
     end
     updatescreen()
+	thomson.last_info = os.clock() -- enable next info()
 end
 
 -- bitmap 16 mode

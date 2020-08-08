@@ -115,6 +115,7 @@ function ColorReducer:add(linearColor)
 	      thomson.levels.linear2to[clamp(b)]
 	self:v(r,g,b):addColor(linearColor)
 	-- if r==1 and g==1 and b==1 then messagebox(self:v(r,g,b).wt) end
+	return self
 end
 
 function ColorReducer:M3d()
@@ -281,7 +282,7 @@ function ColorReducer:boostBorderColors()
 	-- These color can be mixed to produce any other used
 	-- color, so they are kind of really important. 
 	-- Unfortunately most color-reduction algorithm do not
-	-- retain these color ue to averaging property. The idea
+	-- retain these color due to averaging property. The idea
 	-- here is not artifically increase their count so that
 	-- the averaging goes into these colors. 
 

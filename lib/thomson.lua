@@ -172,6 +172,17 @@ function thomson._compress(result,data)
     return result
 end
 
+-- convert color from MO5 to TO7 (MAP requires TO7 encoding)
+local function mo5to7(val)
+	-- MO5: DCBA 4321
+	--      __
+	-- TO7: 4DCB A321
+	local t=((val%16)>=8) and 0 or 128
+	val = math.floor(val/16)*8 + (val%8)
+	val = (val>=64 and val-64 or val+64) + t
+	return val
+end
+
 -- save a map file corresponging to the current file
 -- if a map file already exist, a confirmation is
 -- prompted to the user
@@ -266,8 +277,13 @@ function thomson.savep(name)
     -- save raw data as well ?
     local moved, key, mx, my, mb = waitinput(0.01)
     if key==4123 then -- shift-ESC ==> save raw files as well
-        savem(name .. ".rama", string.char(unpack(thomson.ramA)),0xa000)
-        savem(name .. ".ramb", string.char(unpack(thomson.ramB)),0xc000)
+		local ramA,ramB = {},{}
+		for i=1,#thomson.ramA do 
+			ramA[i] = thomson.ramA[i]
+			ramB[i] = mo5to7(thomson.ramB[i])
+		end
+        savem(name .. ".rama", string.char(unpack(ramA)),0x4000)
+        savem(name .. ".ramb", string.char(unpack(ramB)),0x4000)
         local pal = ""
         for i=0,15 do
             local val = thomson.palette(i)
@@ -440,16 +456,6 @@ function thomson.setMO5()
         else
             return -(thomson.ramB[offs]%16)-1
         end
-    end
-    -- convert color from MO5 to TO7 (MAP requires TO7 encoding)
-    local function mo5to7(val)
-        -- MO5: DCBA 4321
-        --      __
-        -- TO7: 4DCB A321
-        local t=((val%16)>=8) and 0 or 128
-        val = math.floor(val/16)*8 + (val%8)
-        val = (val>=64 and val-64 or val+64) + t
-        return val
     end
     -- return internal MAP file
     function thomson._get_map_data()

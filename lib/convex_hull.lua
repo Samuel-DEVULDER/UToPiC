@@ -222,10 +222,19 @@ end
 -- might be buggy for points outside of hull because dist to vertex isn't computed
 function ConvexHull:distToHull(pt)
 	local min,max
-	for _,F in ipairs(self.hull) do
-		local t = self:distToFace(F,pt)
-		min = min==nil and t or t<min and t or min
-		max = max==nil and t or t>max and t or max
+	if self.hull then
+		for _,F in ipairs(self.hull) do
+			local t = self:distToFace(F,pt)
+			min = min==nil and t or t<min and t or min
+			max = max==nil and t or t>max and t or max
+		end
+	else
+		for _,p in ipairs(self.points) do
+			local V = self:vect(p,pt)
+			local t = dot(V,V)
+			min = min==nil and t or t<min and t or min
+			max = max==nil and t or t>max and t or max
+		end
 	end
 	return max<=0 and max or min>=0 and -min or math.min(-min,max)
 end

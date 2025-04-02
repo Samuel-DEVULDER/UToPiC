@@ -464,7 +464,7 @@ end
 -- fixes the issue ith low-level of intensity
 function ColorReducer:analyzeWithDither(w,h,getLinearPixel,info)
 	-- do return self:analyze(w,h,getLinearPixel,info) end
-	local mat=bayer.make(4)
+	local mat=bayer.make(2)
 	local mx,my=#mat,#mat[1]
 	local function dith(x,y)
 		local function dith(v,t)

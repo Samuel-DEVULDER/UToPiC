@@ -15,16 +15,25 @@ if not run then
 end
 
 if not unpack then
-    unpack= table.unpack
+    unpack = table.unpack
 end
+
 
 if not CMDLINE and type(arg)=='table' and type(arg[1])=='string' then
     CMDLINE = true
-
-    -- append "b" if os require binary mode files
+	start_time = os.clock()
+	
+	local IS_WIN = os.getenv("SystemDrive")
+	IS_WIN = IS_WIN and IS_WIN:match("^.:$") 
+	
+	local i=0 while arg[i] do i=i-1 end
+	local LUA_EXE = arg[i+1]
+	
+	local CONVERT = IS_WIN and 'convert.exe' or 'convert'
+	
+	-- append "b" if os require binary mode files
     local function binmode(rw)
-        local t = os.getenv("SystemDrive")
-        if t and t:match("^.:$") then rw = rw .. 'b' end
+        if IS_WIN then rw = rw .. 'b'  end
         return rw
     end
 
@@ -86,7 +95,7 @@ if not CMDLINE and type(arg)=='table' and type(arg[1])=='string' then
             norm = norm and norm>0 and norm_max/norm,
             getLinearPixel = function(self,x,y)
                 if x<0 or y<0 or x>=self.width or y>=self.height then
-                    return Color.black
+                    return Color.border
                 else
                     local i = self.offset + (self.height-1-y)*self.bytesPerRow + 3*x
                     local b = self.bytecode
@@ -103,11 +112,13 @@ if not CMDLINE and type(arg)=='table' and type(arg[1])=='string' then
     local filename = arg[1]:gsub('^/cygdrive/(%w)/','%1:/')
     local dir,name=filename:match("(.-)([^\\/]+)$");
     if name:lower():match("%.map$") or
+	   name:lower():match("%.bas$") or
        name:lower():match("%.tap$") then os.exit(0) end
     dir = dir=='' and '.' or dir -- prevent empty dir
     local bmp = read_bmp24(io.open(filename, binmode("r")))
     if not bmp then
-        local convert = 'convert "' .. filename .. '" -type truecolor -depth 8 bmp:-'
+		local gamma = 1.02 --1.23 --1.155
+		local convert = 'convert' .. ' "' .. filename .. '" -gamma ' .. gamma .. ' -type truecolor -depth 8 bmp:-'
         bmp = read_bmp24(assert(io.popen(convert,binmode('r'))))
     end
     if not bmp then error("Can't open image: " .. filename) end
@@ -126,7 +137,7 @@ if not CMDLINE and type(arg)=='table' and type(arg[1])=='string' then
     function setpicturesize(w,h)
         -- io.stderr:write(string.rep(' ',79) .. '\r')
         -- io.stderr:write(name .. '...done')
-        statusmessage("done")
+        statusmessage("done ("..(os.clock()-start_time).."s)")
         io.stderr:write('\n')
         io.stderr:flush()
     end
@@ -138,4 +149,6 @@ if not CMDLINE and type(arg)=='table' and type(arg[1])=='string' then
     function wait() end
     function waitinput() end
     function getbackuppixel(x,y) return 255 end
+	function waitinput() return 0,4123,0,0,0 end
+	function messagebox(t) end
 end

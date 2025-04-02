@@ -133,10 +133,13 @@ if not Color then
 	function Color:toPC() 
 		local function f(val) 
 			val = val/Color.ONE
-			-- if val<=0.018 then val = 4.5*val; else val = 1.099*(val ^ (1/2.2))-0.099; end
+			-- val = val ^ (1/2.4)
+			-- val = val ^ (1/2.2)
+			if val<=0.018 then val = 4.5*val; else val = 1.099*(val ^ (1/2.2))-0.099; end
 			
 			-- works much metter: https://fr.wikipedia.org/wiki/SRGB 
-			if val<=0.0031308 then val=12.92*val else val = 1.055*(val ^ (1/2.4))-0.055 end
+			-- if val<=0.0031308 then val=12.92*val else val = 1.055*(val ^ (1/2.4))-0.055 end
+			-- if val<=0.0030355128016102376791797443641364 then val=12.9232102*val else val = 1.055*(val ^ (1/2.4))-0.055 end
 			return val*Color.ONE
 		end;
 		self.r = f(self.r);
@@ -148,10 +151,13 @@ if not Color then
 	function Color:toLinear() 
 		local function f(val) 
 			val = val/Color.ONE
-			-- if val<=0.081 then val = val/4.5; else val = ((val+0.099)/1.099)^2.2; end
+			-- val = val^2.4
+			-- val = val^2.2
+			if val<=0.081 then val = val/4.5; else val = ((val+0.099)/1.099)^2.2; end
 			
 			-- works much metter: https://fr.wikipedia.org/wiki/SRGB#Transformation_inverse
-			if val<=0.04045 then val = val/12.92 else val = ((val+0.055)/1.055)^2.4 end
+			-- if val<=0.04045 then val = val/12.92 else val = ((val+0.055)/1.055)^2.4 end
+			-- if val<=0.0392857 then val = val/12.9232102 else val = ((val+0.055)/1.055)^2.4 end
 			return val*Color.ONE
 		end;
 		self.r = f(self.r);
@@ -164,11 +170,14 @@ if not Color then
 		return self.r, self.g, self.b
 	end
 
+	Color.border = Color.black
+
 	-- return the Color @(x,y) on the original screen in linear space
-	local screen_w, screen_h, _getLinearPictureColor = getpicturesize()
+	local screen_w, screen_h, _getLinearPictureColor
 	if not getLinearPictureColor then
 	function getLinearPictureColor(x,y) 
 		if _getLinearPictureColor==nil then
+			if not screen_w then screen_w,screen_h = getpicturesize() end
 			_getLinearPictureColor = {}
 			for i=0,255 do _getLinearPictureColor[i] = Color:new(getbackupcolor(i)):toLinear(); end
 			if Color.NORMALIZE>0 then
@@ -183,20 +192,29 @@ if not Color then
 					end
 				end
 				local acc,thr=0,Color.NORMALIZE*screen_h*screen_w*3
-				local max
+				local max,min
 				for i=255,0,-1 do
 					acc = acc + histo[i]
 					if not max and acc>=thr then
 						max = Color:new(i,i,i):toLinear().r
 					end
 				end
+				acc=0
+				for i=0,255 do
+					acc = acc + histo[i]
+					if not min and acc>=thr then
+						min = Color:new(i,i,i):toLinear().r
+					end
+				end
+				if min==max then max=min+1 end
+				print(min, max,'\n')
 				for _,c in ipairs(_getLinearPictureColor) do
-					c:mul(Color.ONE/max)
+					c:map(function(x) return (x-min)*Color.ONE/(max-min) end)
 					c.r,c.g,c.b = Color.clamp(c.r,c.g,c.b)
 				end
 			end
 		end
-		return (x<0 or y<0 or x>=screen_w or y>=screen_h) and Color.black or _getLinearPictureColor[getbackuppixel(x,y)]
+		return (x<0 or y<0 or x>=screen_w or y>=screen_h) and Color.border or _getLinearPictureColor[getbackuppixel(x,y)]
 	end end
 	
 	-- http://www.brucelindbloom.com/index.html?Eqn_RGB_XYZ_Matrix.html

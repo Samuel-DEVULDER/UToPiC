@@ -40,14 +40,17 @@ run("lib/bayer.lua")
 local screen_w, screen_h = getpicturesize()
 
 -- Converts thomson coordinates (0-159,0-99) into screen coordinates
+local CENTERED = true
 local function thom2screen(x,y)
 	local i,j;
 	if screen_w/screen_h < 1.6 then
-		i = x*screen_h/100
+		local o = CENTERED and (screen_w-screen_h*1.6)/2 or 0
+		i = x*screen_h/100+o
 		j = y*screen_h/100
 	else
+		local o = CENTERED and (screen_h-screen_w/1.6)/2 or 0
 		i = x*screen_w/160
-		j = y*screen_w/160
+		j = y*screen_w/160+o
 	end
 	return math.floor(i), math.floor(j)
 end

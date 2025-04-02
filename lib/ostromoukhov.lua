@@ -18,6 +18,8 @@ run('thomson.lua')
 
 if not OstroDither then
 
+local CENTERED = true
+
 OstroDither = {}
 
 local function default_levels() 
@@ -38,7 +40,7 @@ function OstroDither:new(palette,attenuation,levels)
 end
 
 function OstroDither:dist2(c1,c2)
-	return c1:dist2(c2)
+	return c1:euclid_dist2(c2)
 end
 
 function OstroDither:setLevelsFromPalette()
@@ -584,11 +586,13 @@ function OstroDither:dither40cols(getpalette,serpentine)
 	local function thom2screen(x,y)
 		local i,j;
 		if screen_w/screen_h < 1.6 then
-			i = x*screen_h/200
+			local o = CENTERED and (screen_w-screen_h*1.6)/2 or 0
+			i = x*screen_h/200+o
 			j = y*screen_h/200
 		else
+			local o = CENTERED and (screen_h-screen_w/1.6)/2 or 0
 			i = x*screen_w/320
-			j = y*screen_w/320
+			j = y*screen_w/320+o
 		end
 		return math.floor(i), math.floor(j)
 	end
